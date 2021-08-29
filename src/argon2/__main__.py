@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import sys
 import timeit
-
-import six
 
 from . import (
     DEFAULT_HASH_LENGTH,
@@ -29,7 +23,7 @@ def main(argv):
         "-m", type=int, help="`memory_cost`", default=DEFAULT_MEMORY_COST
     )
     parser.add_argument(
-        "-p", type=int, help="`parallellism`", default=DEFAULT_PARALLELISM
+        "-p", type=int, help="`parallelism`", default=DEFAULT_PARALLELISM
     )
     parser.add_argument(
         "-l", type=int, help="`hash_length`", default=DEFAULT_HASH_LENGTH
@@ -55,7 +49,7 @@ def main(argv):
 
     print("Running Argon2id %d times with:" % (args.n,))
 
-    for k, v in sorted(six.iteritems(params)):
+    for k, v in sorted(params.items()):
         print("%s: %d %s" % (k, v[0], v[1]))
 
     print("\nMeasuring...")
@@ -81,7 +75,7 @@ gc.enable()""".format(
         number=args.n,
     )
     print(
-        "\n{0:.3}ms per password verification".format(duration / args.n * 1000)
+        "\n{:.1f}ms per password verification".format(duration / args.n * 1000)
     )
 
 

@@ -3,6 +3,15 @@ requires = ["setuptools>=40.6.0", "wheel", "cffi>=1.0"]
 build-backend = "setuptools.build_meta"
 
 
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --capture=no"
+xfail_strict = true
+testpaths = "tests"
+filterwarnings = [
+    "once::Warning",
+]
+
+
 [tool.coverage.run]
 parallel = true
 branch = true
@@ -21,12 +30,4 @@ line-length = 79
 
 
 [tool.isort]
-atomic=true
-include_trailing_comma=true
-lines_after_imports=2
-lines_between_types=1
-multi_line_output=3
-not_skip="__init__.py"
-
-known_first_party="argon2"
-known_third_party=["argon2", "cffi", "hypothesis", "pytest", "setuptools", "six"]
+profile = "attrs"

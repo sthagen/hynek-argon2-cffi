@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import codecs
 import os
 import platform
@@ -49,17 +47,6 @@ sources = [
 
 # Add vendored integer types headers if necessary.
 windows = "win32" in str(sys.platform).lower()
-if windows:
-    int_base = "extras/msinttypes/"
-    inttypes = int_base + "inttypes"
-    stdint = int_base + "stdint"
-    vi = sys.version_info[0:2]
-    if vi in [(2, 6), (2, 7)]:
-        # VS 2008 needs both.
-        include_dirs += [inttypes, stdint]
-    elif vi in [(3, 3), (3, 4)]:
-        # VS 2010 needs inttypes.h and fails with both.
-        include_dirs += [inttypes]
 
 LIBRARIES = [("argon2", {"include_dirs": include_dirs, "sources": sources})]
 META_PATH = os.path.join("src", "argon2", "__init__.py")
@@ -68,6 +55,10 @@ PROJECT_URLS = {
     "Documentation": "https://argon2-cffi.readthedocs.io/",
     "Bug Tracker": "https://github.com/hynek/argon2-cffi/issues",
     "Source Code": "https://github.com/hynek/argon2-cffi",
+    "Funding": "https://github.com/sponsors/hynek",
+    "Tidelift": "https://tidelift.com/subscription/pkg/pypi-argon2-cffi?"
+    "utm_source=pypi-argon2-cffi&utm_medium=pypi",
+    "Ko-fi": "https://ko-fi.com/the_hynek",
 }
 CLASSIFIERS = [
     "Development Status :: 5 - Production/Stable",
@@ -78,13 +69,13 @@ CLASSIFIERS = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python",
@@ -93,15 +84,11 @@ CLASSIFIERS = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
+PYTHON_REQUIRES = ">=3.5"
 SETUP_REQUIRES = ["cffi"]
-if windows and sys.version_info[0] == 2:
-    # required for "Microsoft Visual C++ Compiler for Python 2.7"
-    # https://www.microsoft.com/en-us/download/details.aspx?id=44266
-    SETUP_REQUIRES.append("setuptools>=6.0")
-
-INSTALL_REQUIRES = ["cffi>=1.0.0", "six", "enum34; python_version<'3.4'"]
+INSTALL_REQUIRES = ["cffi>=1.0.0"]
 EXTRAS_REQUIRE = {
-    "docs": ["sphinx"],
+    "docs": ["sphinx", "furo"],
     "tests": ["coverage[toml]>=5.0.2", "hypothesis", "pytest"],
 }
 EXTRAS_REQUIRE["dev"] = (
@@ -316,7 +303,7 @@ class BuildCLibWithCompilerFlags(build_clib):
                 )
             sources = list(sources)
 
-            print("building '%s' library" % (lib_name,))
+            print("building '{}' library".format(lib_name))
 
             # First, compile the source code to object files in the library
             # directory.  (This should probably change to putting object
@@ -340,11 +327,7 @@ class BuildCLibWithCompilerFlags(build_clib):
             )
 
 
-if (
-    sys.platform != "win32"
-    and sys.version_info > (3,)
-    and platform.python_implementation() == "CPython"
-):
+if sys.version_info > (3,) and platform.python_implementation() == "CPython":
     try:
         import wheel.bdist_wheel
     except ImportError:
@@ -379,6 +362,7 @@ if __name__ == "__main__":
         packages=PACKAGES,
         package_dir={"": "src"},
         classifiers=CLASSIFIERS,
+        python_requires=PYTHON_REQUIRES,
         install_requires=INSTALL_REQUIRES,
         extras_require=EXTRAS_REQUIRE,
         # CFFI

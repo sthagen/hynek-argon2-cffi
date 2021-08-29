@@ -5,7 +5,7 @@ Versions are year-based with a strict backward compatibility policy.
 The third digit is only for regressions.
 
 
-20.2.0 (UNRELEASED)
+21.2.0 (UNRELEASED)
 -------------------
 
 Vendoring Argon2 @ UNRELEASED
@@ -27,6 +27,38 @@ Changes:
 ^^^^^^^^
 
 *none*
+
+
+----
+
+
+21.1.0 (2021-08-29)
+-------------------
+
+Vendoring Argon2 @ `62358ba <https://github.com/P-H-C/phc-winner-argon2/tree/62358ba2123abd17fccf2a108a301d4b52c01a7c>`_ (20190702)
+
+
+Backward-incompatible changes:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Microsoft stopped providing the necessary SDKs to ship Python 2.7 wheels and currenly the downloads amount to 0.09%.
+Therefore we have decided that Python 2.7 is not supported anymore.
+
+
+Deprecations:
+^^^^^^^^^^^^^
+
+*none*
+
+
+Changes:
+^^^^^^^^
+
+There are indeed no changes whatsoever to the code of *argon2-cffi*.
+The *Argon2* project also hasn't tagged a new release since July 2019.
+There also don't seem to be any important pending fixes.
+
+This release is mainly about improving the way binary wheels are built (abi3 on all platforms).
 
 
 ----
@@ -85,7 +117,7 @@ Changes:
 
 - The dependency on ``enum34`` is now protected using a PEP 508 marker.
   This fixes problems when the sdist is handled by a different interpreter version than the one running it.
-  `#48 <https://github.com/hynek/argon2-cffi/pull/48>`_
+  `#48 <https://github.com/hynek/argon2-cffi/issues/48>`_
 
 
 ----
@@ -156,8 +188,8 @@ Changes:
 
 - The hash type for ``argon2.PasswordHasher`` is Argon2\ **id** now.
 
-  This decision has been made based on the recommendations in the latest `Argon2 RFC draft <https://tools.ietf.org/html/draft-irtf-cfrg-argon2-04#section-4>`_.
-  `#33 <https://github.com/hynek/argon2-cffi/pull/33>`_
+  This decision has been made based on the recommendations in the latest `Argon2 RFC draft <https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-argon2-04#section-4>`_.
+  `#33 <https://github.com/hynek/argon2-cffi/issues/33>`_
   `#34 <https://github.com/hynek/argon2-cffi/pull/34>`_
 - To make the change of hash type backward compatible, ``argon2.PasswordHasher.verify()`` now determines the type of the hash and verifies it accordingly.
 - Some of the hash parameters have been made stricter to be closer to said recommendations.
@@ -199,7 +231,7 @@ Changes:
   `#20 <https://github.com/hynek/argon2-cffi/pull/20>`_
 - Fix a bunch of warnings with new ``cffi`` versions and Python 3.6.
   `#14 <https://github.com/hynek/argon2-cffi/pull/14>`_
-  `#16 <https://github.com/hynek/argon2-cffi/pull/16>`_
+  `#16 <https://github.com/hynek/argon2-cffi/issues/16>`_
 - Add low-level bindings for Argon2id functions.
 
 
@@ -242,7 +274,7 @@ Changes:
 
 - Add ``VerifyMismatchError`` that is raised if verification fails only because of a password/hash mismatch.
   It's a subclass of ``VerificationError`` therefore this change is completely backward compatible.
-- Add support for `Argon2 1.3 <https://www.ietf.org/mail-archive/web/cfrg/current/msg07948.html>`_.
+- Add support for `Argon2 1.3 <https://mailarchive.ietf.org/arch/msg/cfrg/beOzPh41Hz3cjl5QD7MSRNTi3lA/>`_.
   Old hashes remain functional but opportunistic rehashing is strongly recommended.
 
 
