@@ -1,18 +1,24 @@
+# SPDX-License-Identifier: MIT
+
 import os
 
+from typing import Union
+
+from ._typing import Literal
 from ._utils import Parameters, _check_types, extract_parameters
 from .exceptions import InvalidHash
 from .low_level import Type, hash_secret, verify_secret
+from .profiles import RFC_9106_LOW_MEMORY
 
 
-DEFAULT_RANDOM_SALT_LENGTH = 16
-DEFAULT_HASH_LENGTH = 16
-DEFAULT_TIME_COST = 2
-DEFAULT_MEMORY_COST = 102400
-DEFAULT_PARALLELISM = 8
+DEFAULT_RANDOM_SALT_LENGTH = RFC_9106_LOW_MEMORY.salt_len
+DEFAULT_HASH_LENGTH = RFC_9106_LOW_MEMORY.hash_len
+DEFAULT_TIME_COST = RFC_9106_LOW_MEMORY.time_cost
+DEFAULT_MEMORY_COST = RFC_9106_LOW_MEMORY.memory_cost
+DEFAULT_PARALLELISM = RFC_9106_LOW_MEMORY.parallelism
 
 
-def _ensure_bytes(s, encoding):
+def _ensure_bytes(s: Union[bytes, str], encoding: str) -> bytes:
     """
     Ensure *s* is a bytes string.  Encode using *encoding* if it isn't.
     """
@@ -26,7 +32,7 @@ class PasswordHasher:
     High level class to hash passwords with sensible defaults.
 
     Uses Argon2\ **id** by default and always uses a random salt_ for hashing.
-    But it can verify any type of Argon2 as long as the hash is correctly
+    But it can verify any type of *Argon2* as long as the hash is correctly
     encoded.
 
     The reason for this being a class is both for convenience to carry
@@ -41,10 +47,10 @@ class PasswordHasher:
     :param int hash_len: Length of the hash in bytes.
     :param int salt_len: Length of random salt to be generated for each
         password.
-    :param str encoding: The Argon2 C library expects bytes.  So if
-        :meth:`hash` or :meth:`verify` are passed an unicode string, it will be
+    :param str encoding: The *Argon2* C library expects bytes.  So if
+        :meth:`hash` or :meth:`verify` are passed a ``str``, it will be
         encoded using this encoding.
-    :param Type type: Argon2 type to use.  Only change for interoperability
+    :param Type type: *Argon2* type to use.  Only change for interoperability
         with legacy systems.
 
     .. versionadded:: 16.0.0
@@ -54,22 +60,28 @@ class PasswordHasher:
     .. versionchanged:: 18.2.0
        Changed default *memory_cost* to 100 MiB and default *parallelism* to 8.
     .. versionchanged:: 18.2.0 ``verify`` now will determine the type of hash.
-    .. versionchanged:: 18.3.0 The Argon2 type is configurable now.
+    .. versionchanged:: 18.3.0 The *Argon2* type is configurable now.
+    .. versionadded:: 21.2.0 :meth:`from_parameters`
+    .. versionchanged:: 21.2.0
+       Changed defaults to :data:`argon2.profiles.RFC_9106_LOW_MEMORY`.
 
     .. _salt: https://en.wikipedia.org/wiki/Salt_(cryptography)
     .. _kibibytes: https://en.wikipedia.org/wiki/Binary_prefix#kibi
     """
     __slots__ = ["_parameters", "encoding"]
 
+    _parameters: Parameters
+    encoding: str
+
     def __init__(
         self,
-        time_cost=DEFAULT_TIME_COST,
-        memory_cost=DEFAULT_MEMORY_COST,
-        parallelism=DEFAULT_PARALLELISM,
-        hash_len=DEFAULT_HASH_LENGTH,
-        salt_len=DEFAULT_RANDOM_SALT_LENGTH,
-        encoding="utf-8",
-        type=Type.ID,
+        time_cost: int = DEFAULT_TIME_COST,
+        memory_cost: int = DEFAULT_MEMORY_COST,
+        parallelism: int = DEFAULT_PARALLELISM,
+        hash_len: int = DEFAULT_HASH_LENGTH,
+        salt_len: int = DEFAULT_RANDOM_SALT_LENGTH,
+        encoding: str = "utf-8",
+        type: Type = Type.ID,
     ):
         e = _check_types(
             time_cost=(time_cost, int),
@@ -95,40 +107,52 @@ class PasswordHasher:
         )
         self.encoding = encoding
 
+    @classmethod
+    def from_parameters(cls, params: Parameters) -> "PasswordHasher":
+        """
+        Construct a `PasswordHasher` from *params*.
+
+        .. versionadded:: 21.2.0
+        """
+        ph = cls()
+        ph._parameters = params
+
+        return ph
+
     @property
-    def time_cost(self):
+    def time_cost(self) -> int:
         return self._parameters.time_cost
 
     @property
-    def memory_cost(self):
+    def memory_cost(self) -> int:
         return self._parameters.memory_cost
 
     @property
-    def parallelism(self):
+    def parallelism(self) -> int:
         return self._parameters.parallelism
 
     @property
-    def hash_len(self):
+    def hash_len(self) -> int:
         return self._parameters.hash_len
 
     @property
-    def salt_len(self):
+    def salt_len(self) -> int:
         return self._parameters.salt_len
 
     @property
-    def type(self):
+    def type(self) -> Type:
         return self._parameters.type
 
-    def hash(self, password):
+    def hash(self, password: Union[str, bytes]) -> str:
         """
         Hash *password* and return an encoded hash.
 
         :param password: Password to hash.
-        :type password: ``bytes`` or ``unicode``
+        :type password: ``bytes`` or ``str``
 
         :raises argon2.exceptions.HashingError: If hashing fails.
 
-        :rtype: unicode
+        :rtype: str
         """
         return hash_secret(
             secret=_ensure_bytes(password, self.encoding),
@@ -146,7 +170,9 @@ class PasswordHasher:
         b"$argon2id": Type.ID,
     }
 
-    def verify(self, hash, password):
+    def verify(
+        self, hash: Union[str, bytes], password: Union[str, bytes]
+    ) -> Literal[True]:
         """
         Verify that *password* matches *hash*.
 
@@ -154,21 +180,21 @@ class PasswordHasher:
 
             It is assumed that the caller is in full control of the hash.  No
             other parsing than the determination of the hash type is done by
-            ``argon2-cffi``.
+            *argon2-cffi*.
 
         :param hash: An encoded hash as returned from
             :meth:`PasswordHasher.hash`.
-        :type hash: ``bytes`` or ``unicode``
+        :type hash: ``bytes`` or ``str``
 
         :param password: The password to verify.
-        :type password: ``bytes`` or ``unicode``
+        :type password: ``bytes`` or ``str``
 
         :raises argon2.exceptions.VerifyMismatchError: If verification fails
             because *hash* is not valid for *password*.
         :raises argon2.exceptions.VerificationError: If verification fails for
             other reasons.
         :raises argon2.exceptions.InvalidHash: If *hash* is so clearly
-            invalid, that it couldn't be passed to Argon2.
+            invalid, that it couldn't be passed to *Argon2*.
 
         :return: ``True`` on success, raise
             :exc:`~argon2.exceptions.VerificationError` otherwise.
@@ -189,11 +215,11 @@ class PasswordHasher:
             hash, _ensure_bytes(password, self.encoding), hash_type
         )
 
-    def check_needs_rehash(self, hash):
+    def check_needs_rehash(self, hash: str) -> bool:
         """
         Check whether *hash* was created using the instance's parameters.
 
-        Whenever your Argon2 parameters -- or ``argon2-cffi``'s defaults! --
+        Whenever your *Argon2* parameters -- or *argon2-cffi*'s defaults! --
         change, you should rehash your passwords at the next opportunity.  The
         common approach is to do that whenever a user logs in, since that
         should be the only time when you have access to the cleartext

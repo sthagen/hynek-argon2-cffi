@@ -1,15 +1,17 @@
-``argon2-cffi``
-===============
+==================================
+*argon2-cffi*: *Argon2* for Python
+==================================
 
-Release v\ |release| (:doc:`What's new? <changelog>`).
+Release v\ |release| (|changelog|_)
 
 
 .. include:: ../README.rst
-   :start-after: teaser-begin
+   :start-after: -begin-short-
+   :end-before: -end-short-
 
 
 User's Guide
-------------
+============
 
 .. toctree::
    :maxdepth: 1
@@ -22,15 +24,13 @@ User's Guide
    faq
 
 
-Project Information
--------------------
+.. include:: ../README.rst
+   :start-after: -begin-meta-
+   :end-before: -end-meta-
 
 .. toctree::
    :maxdepth: 1
 
-   backward-compatibility
-   contributing
-   changelog
    license
 
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """
 Low-level functions if you want to build your own higher level abstractions.
 
@@ -7,10 +9,12 @@ Low-level functions if you want to build your own higher level abstractions.
     module is full of land mines, dragons, and dinosaurs with laser guns.
 """
 
-
 from enum import Enum
+from typing import Any
 
-from ._ffi import ffi, lib
+from _argon2_cffi_bindings import ffi, lib
+
+from ._typing import Literal
 from .exceptions import HashingError, VerificationError, VerifyMismatchError
 
 
@@ -65,15 +69,15 @@ class Type(Enum):
 
 
 def hash_secret(
-    secret,
-    salt,
-    time_cost,
-    memory_cost,
-    parallelism,
-    hash_len,
-    type,
-    version=ARGON2_VERSION,
-):
+    secret: bytes,
+    salt: bytes,
+    time_cost: int,
+    memory_cost: int,
+    parallelism: int,
+    hash_len: int,
+    type: Type,
+    version: int = ARGON2_VERSION,
+) -> bytes:
     """
     Hash *secret* and return an **encoded** hash.
 
@@ -131,15 +135,15 @@ def hash_secret(
 
 
 def hash_secret_raw(
-    secret,
-    salt,
-    time_cost,
-    memory_cost,
-    parallelism,
-    hash_len,
-    type,
-    version=ARGON2_VERSION,
-):
+    secret: bytes,
+    salt: bytes,
+    time_cost: int,
+    memory_cost: int,
+    parallelism: int,
+    hash_len: int,
+    type: Type,
+    version: int = ARGON2_VERSION,
+) -> bytes:
     """
     Hash *password* and return a **raw** hash.
 
@@ -170,7 +174,7 @@ def hash_secret_raw(
     return bytes(ffi.buffer(buf, hash_len))
 
 
-def verify_secret(hash, secret, type):
+def verify_secret(hash: bytes, secret: bytes, type: Type) -> Literal[True]:
     """
     Verify whether *secret* is correct for *hash* of *type*.
 
@@ -208,27 +212,27 @@ def verify_secret(hash, secret, type):
         raise VerificationError(error_to_str(rv))
 
 
-def core(context, type):
+def core(context: Any, type: int) -> int:
     """
     Direct binding to the ``argon2_ctx`` function.
 
     .. warning::
         This is a strictly advanced function working on raw C data structures.
-        Both Argon2's and ``argon2-cffi``'s higher-level bindings do a lot of
+        Both *Argon2*'s and *argon2-cffi*'s higher-level bindings do a lot of
         sanity checks and housekeeping work that *you* are now responsible for
         (e.g. clearing buffers). The structure of the *context* object can,
         has, and will change with *any* release!
 
-        Use at your own peril; ``argon2-cffi`` does *not* use this binding
+        Use at your own peril; *argon2-cffi* does *not* use this binding
         itself.
 
-    :param context: A CFFI Argon2 context object (i.e. an ``struct
+    :param context: A CFFI *Argon2* context object (i.e. an ``struct
         Argon2_Context``/``argon2_context``).
-    :param int type: Which Argon2 variant to use.  You can use the ``value``
+    :param int type: Which *Argon2* variant to use.  You can use the ``value``
         field of :class:`Type`'s fields.
 
     :rtype: int
-    :return: An Argon2 error code.  Can be transformed into a string using
+    :return: An *Argon2* error code.  Can be transformed into a string using
         :func:`error_to_str`.
 
     .. versionadded:: 16.0.0
@@ -236,7 +240,7 @@ def core(context, type):
     return lib.argon2_ctx(context, type)
 
 
-def error_to_str(error):
+def error_to_str(error: int) -> str:
     """
     Convert an Argon2 error code into a native string.
 

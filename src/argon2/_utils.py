@@ -1,3 +1,8 @@
+# SPDX-License-Identifier: MIT
+
+from dataclasses import dataclass
+from typing import Any, Optional
+
 from .exceptions import InvalidHash
 from .low_level import Type
 
@@ -5,7 +10,7 @@ from .low_level import Type
 NoneType = type(None)
 
 
-def _check_types(**kw):
+def _check_types(**kw: Any) -> Optional[str]:
     """
     Check each ``name: (value, types)`` in *kw*.
 
@@ -27,15 +32,10 @@ def _check_types(**kw):
     if errors != []:
         return ", ".join(errors) + "."
 
-
-def _encoded_str_len(l):
-    """
-    Compute how long a byte string of length *l* becomes if encoded to hex.
-    """
-    return (l << 2) / 3 + 2
+    return None
 
 
-def _decoded_str_len(l):
+def _decoded_str_len(l: int) -> int:
     """
     Compute how long an encoded string of length *l* becomes.
     """
@@ -51,6 +51,7 @@ def _decoded_str_len(l):
     return l // 4 * 3 + last_group_len
 
 
+@dataclass
 class Parameters:
     """
     Argon2 hash parameters.
@@ -68,6 +69,14 @@ class Parameters:
     .. versionadded:: 18.2.0
     """
 
+    type: Type
+    version: int
+    salt_len: int
+    hash_len: int
+    time_cost: int
+    memory_cost: int
+    parallelism: int
+
     __slots__ = [
         "type",
         "version",
@@ -78,73 +87,12 @@ class Parameters:
         "parallelism",
     ]
 
-    def __init__(
-        self,
-        type,
-        version,
-        salt_len,
-        hash_len,
-        time_cost,
-        memory_cost,
-        parallelism,
-    ):
-        self.type = type
-        self.version = version
-        self.salt_len = salt_len
-        self.hash_len = hash_len
-        self.time_cost = time_cost
-        self.memory_cost = memory_cost
-        self.parallelism = parallelism
-
-    def __repr__(self):
-        return (
-            "<Parameters(type=%r, version=%d, hash_len=%d, salt_len=%d, "
-            "time_cost=%d, memory_cost=%d, parallelism=%d)>"
-            % (
-                self.type,
-                self.version,
-                self.hash_len,
-                self.salt_len,
-                self.time_cost,
-                self.memory_cost,
-                self.parallelism,
-            )
-        )
-
-    def __eq__(self, other):
-        if self.__class__ != other.__class__:
-            return NotImplemented
-
-        return (
-            self.type,
-            self.version,
-            self.salt_len,
-            self.hash_len,
-            self.time_cost,
-            self.memory_cost,
-            self.parallelism,
-        ) == (
-            other.type,
-            other.version,
-            other.salt_len,
-            other.hash_len,
-            other.time_cost,
-            other.memory_cost,
-            other.parallelism,
-        )
-
-    def __ne__(self, other):
-        if self.__class__ != other.__class__:
-            return NotImplemented
-
-        return not self.__eq__(other)
-
 
 _NAME_TO_TYPE = {"argon2id": Type.ID, "argon2i": Type.I, "argon2d": Type.D}
 _REQUIRED_KEYS = sorted(("v", "m", "t", "p"))
 
 
-def extract_parameters(hash):
+def extract_parameters(hash: str) -> Parameters:
     """
     Extract parameters from an encoded *hash*.
 
