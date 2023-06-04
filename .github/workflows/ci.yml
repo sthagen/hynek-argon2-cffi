@@ -32,35 +32,21 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
           - "pypy-3.7"
           - "pypy-3.8"
 
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443
-            files.pythonhosted.org:443
-            github.com:443
-            objects.githubusercontent.com:443
-            pypi.org:443
-
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       - run: python -Im pip install --upgrade wheel tox
 
       - name: Determine Python version for tox
         run: |
           V=${{ matrix.python-version }}
-          if [[ "$V" = ~* ]]; then
-            # Extract version from a '~3.XX.0-0' specifier.
-            V=${V:1:4}
-          fi
-
           if [[ "$V" = pypy-* ]]; then
             V=pypy3
           else
@@ -84,15 +70,6 @@ jobs:
     needs: tests
 
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
-
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
       - uses: actions/download-artifact@v3
@@ -120,16 +97,6 @@ jobs:
       SETUPTOOLS_SCM_PRETEND_VERSION: "" # inconsistency error otherwise
 
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            azure.archive.ubuntu.com:80
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
-
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -143,8 +110,18 @@ jobs:
 
       - run: python -Im tox run -e system-argon2
 
-  mypy:
-    name: Mypy on ${{ matrix.python-version }}
+  mypy-all:
+    name: Mypy for API & own code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+
+      - run: python -Im pip install --upgrade wheel tox
+      - run: python -Im tox run -f mypy
+
+  mypy-api:
+    name: Mypy for API on ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -155,58 +132,30 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
 
       - run: python -Im pip install --upgrade wheel tox
-      - run: python -Im tox run -e mypy
+      - run: python -Im tox run -e mypy-api
 
   docs:
     name: Build docs & run doctests
     runs-on: ubuntu-latest
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            docs.python.org:443
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
-
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          # Keep in-sync with .readthedocs.yaml and tox.ini/docs.
+          python-version: "3.11"
       - run: python -Im pip install --upgrade wheel tox
 
       - run: tox run -e docs
-
-  package:
-    name: Build & verify package
-    runs-on: ubuntu-latest
-    env:
-      SETUPTOOLS_SCM_PRETEND_VERSION: ""
-
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: hynek/build-and-inspect-python-package@v1
 
   install-dev:
     name: Verify dev env
@@ -216,15 +165,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            files.pythonhosted.org:443
-            github.com:443
-            pypi.org:443
-
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
       - run: python -Im pip install -e .[dev]
@@ -237,19 +177,15 @@ jobs:
 
     needs:
       - coverage
+      - mypy-all
+      - mypy-api
       - docs
       - install-dev
-      - package
       - system-package
 
     runs-on: ubuntu-latest
 
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: block
-
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:

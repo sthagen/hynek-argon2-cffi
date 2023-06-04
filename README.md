@@ -1,4 +1,4 @@
-# *Argon2* for Python
+# Argon2 for Python
 
 [![Documentation](https://img.shields.io/badge/Docs-Read%20The%20Docs-black)](https://argon2-cffi.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-C06524)](https://github.com/hynek/argon2-cffi/blob/main/LICENSE)
@@ -8,7 +8,7 @@
 
 <!-- begin-short -->
 
-[*Argon2*](https://github.com/p-h-c/phc-winner-argon2) won the [Password Hashing Competition](https://www.password-hashing.net/) and *argon2-cffi* is the simplest way to use it in Python and PyPy:
+[Argon2](https://github.com/p-h-c/phc-winner-argon2) won the [Password Hashing Competition](https://www.password-hashing.net/) and *argon2-cffi* is the simplest way to use it in Python and PyPy:
 
 ```pycon
 >>> from argon2 import PasswordHasher
@@ -38,6 +38,15 @@ argon2.exceptions.VerifyMismatchError: The password does not match the supplied 
 - [**Changelog**](https://github.com/hynek/argon2-cffi/blob/main/CHANGELOG.md)
 
 The low-level Argon2 CFFI bindings are maintained in the separate [*argon2-cffi-bindings*](https://github.com/hynek/argon2-cffi-bindings) project.
+
+
+### Credits
+
+*argon2-cffi* is maintained by [Hynek Schlawack](https://hynek.me/).
+
+The development is kindly supported by my employer [Variomedia AG](https://www.variomedia.de/), *argon2-cffi* [Tidelift subscribers](https://tidelift.com/subscription/pkg/pypi-argon2-cffi?utm_source=pypi-argon2-cffi&utm_medium=referral&utm_campaign=enterprise&utm_term=repo), and all my amazing [GitHub Sponsors](https://github.com/sponsors/hynek).
+
+A full list of contributors can be found in GitHub's [overview](https://github.com/hynek/argon2-cffi/graphs/contributors).
 
 
 ### *argon2-cffi* for Enterprise

@@ -15,28 +15,25 @@ description = "Argon2 for Python"
 authors = [{ name = "Hynek Schlawack", email = "hs@ox.cx" }]
 dynamic = ["version", "readme"]
 requires-python = ">=3.7"
-license = { file = "LICENSE" }
+license = "MIT"
 keywords = ["password", "hash", "hashing", "security"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
-    "Programming Language :: Python",
     "Topic :: Security :: Cryptography",
-    "Topic :: Security",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
@@ -55,12 +52,11 @@ Changelog = "https://github.com/hynek/argon2-cffi/blob/main/CHANGELOG.md"
 "Source Code" = "https://github.com/hynek/argon2-cffi"
 Funding = "https://github.com/sponsors/hynek"
 Tidelift = "https://tidelift.com/subscription/pkg/pypi-argon2-cffi?utm_source=pypi-argon2-cffi&utm_medium=pypi"
-Ko-fi = "https://ko-fi.com/the_hynek"
 
 
 [tool.hatch.version]
 source = "vcs"
-raw-options = { version_scheme = "no-guess-dev" }
+raw-options = { local_scheme = "no-local-version" }
 
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
@@ -84,13 +80,6 @@ pattern = "## ([^\n]+?\n\n)###"
 path = "CHANGELOG.md"
 start-after = "<!-- changelog follows -->"
 pattern = "\n(###.+?\n)## "
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-text = "## Credits\n"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "AUTHORS.md"
-start-after = "# Credits & License\n"
 
 
 [tool.pytest.ini_options]
@@ -131,36 +120,16 @@ omit = []
 
 
 [tool.mypy]
+strict = true
+
 show_error_codes = true
+enable_error_code = ["ignore-without-code"]
 
-# show error messages from unrelated files
-follow_imports = "normal"
-
-# suppress errors about unsatisfied imports
 ignore_missing_imports = true
 
-# be strict
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-strict_optional = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
-
-# sometimes redefinition is just fine
-allow_redefinition = true
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "conftest.*"
 ignore_errors = true
 
 
@@ -168,5 +137,35 @@ ignore_errors = true
 line-length = 79
 
 
-[tool.isort]
-profile = "attrs"
+[tool.ruff]
+src = ["src", "tests", "noxfile.py"]
+select = [
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "YTT", # flake8-2020
+    "S",   # flake8-bandit
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "T10", # flake8-debugger
+    "ISC", # flake8-implicit-str-concat
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "DTZ", # flake8-datetimez
+    "I",   # isort
+    "PGH", # pygrep-hooks
+    "PLC", # Pylint
+    "PIE", # flake8-pie
+    "RUF", # ruff
+]
+ignore = [
+    "RUF001", # leave my smart characters alone
+    "S101",   # assert
+    "SIM300", # Yoda rocks in asserts
+]
+
+[tool.ruff.isort]
+lines-between-types = 1
+lines-after-imports = 2

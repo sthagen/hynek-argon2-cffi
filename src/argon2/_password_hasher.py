@@ -6,7 +6,7 @@ import os
 
 from ._typing import Literal
 from ._utils import Parameters, _check_types, extract_parameters
-from .exceptions import InvalidHash
+from .exceptions import InvalidHashError
 from .low_level import Type, hash_secret, verify_secret
 from .profiles import RFC_9106_LOW_MEMORY
 
@@ -32,7 +32,7 @@ class PasswordHasher:
     High level class to hash passwords with sensible defaults.
 
     Uses Argon2\ **id** by default and always uses a random salt_ for hashing.
-    But it can verify any type of *Argon2* as long as the hash is correctly
+    But it can verify any type of Argon2 as long as the hash is correctly
     encoded.
 
     The reason for this being a class is both for convenience to carry
@@ -47,10 +47,10 @@ class PasswordHasher:
     :param int hash_len: Length of the hash in bytes.
     :param int salt_len: Length of random salt to be generated for each
         password.
-    :param str encoding: The *Argon2* C library expects bytes.  So if
+    :param str encoding: The Argon2 C library expects bytes.  So if
         :meth:`hash` or :meth:`verify` are passed a ``str``, it will be
         encoded using this encoding.
-    :param Type type: *Argon2* type to use.  Only change for interoperability
+    :param Type type: Argon2 type to use.  Only change for interoperability
         with legacy systems.
 
     .. versionadded:: 16.0.0
@@ -60,7 +60,7 @@ class PasswordHasher:
     .. versionchanged:: 18.2.0
        Changed default *memory_cost* to 100 MiB and default *parallelism* to 8.
     .. versionchanged:: 18.2.0 ``verify`` now will determine the type of hash.
-    .. versionchanged:: 18.3.0 The *Argon2* type is configurable now.
+    .. versionchanged:: 18.3.0 The Argon2 type is configurable now.
     .. versionadded:: 21.2.0 :meth:`from_parameters`
     .. versionchanged:: 21.2.0
        Changed defaults to :data:`argon2.profiles.RFC_9106_LOW_MEMORY`.
@@ -194,7 +194,7 @@ class PasswordHasher:
         :raises argon2.exceptions.VerificationError: If verification fails for
             other reasons.
         :raises argon2.exceptions.InvalidHash: If *hash* is so clearly
-            invalid, that it couldn't be passed to *Argon2*.
+            invalid, that it couldn't be passed to Argon2.
 
         :return: ``True`` on success, raise
             :exc:`~argon2.exceptions.VerificationError` otherwise.
@@ -209,7 +209,7 @@ class PasswordHasher:
         try:
             hash_type = self._header_to_type[hash[:9]]
         except LookupError:
-            raise InvalidHash()
+            raise InvalidHashError() from None
 
         return verify_secret(
             hash, _ensure_bytes(password, self.encoding), hash_type
@@ -219,7 +219,7 @@ class PasswordHasher:
         """
         Check whether *hash* was created using the instance's parameters.
 
-        Whenever your *Argon2* parameters -- or *argon2-cffi*'s defaults! --
+        Whenever your Argon2 parameters -- or *argon2-cffi*'s defaults! --
         change, you should rehash your passwords at the next opportunity.  The
         common approach is to do that whenever a user logs in, since that
         should be the only time when you have access to the cleartext

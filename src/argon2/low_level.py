@@ -51,7 +51,7 @@ class Type(Enum):
     it less suitable for hashing secrets and more suitable for cryptocurrencies
     and applications with no threats from side-channel timing attacks.
     """
-    I = lib.Argon2_i
+    I = lib.Argon2_i  # noqa: E741
     r"""
     Argon2\ **i** uses data-independent memory access.  Argon2i is slower as
     it makes more passes over the memory to protect from tradeoff attacks.
@@ -133,7 +133,7 @@ def hash_secret(
     if rv != lib.ARGON2_OK:
         raise HashingError(error_to_str(rv))
 
-    return ffi.string(buf)
+    return ffi.string(buf)  # type: ignore[no-any-return]
 
 
 def hash_secret_raw(
@@ -206,12 +206,14 @@ def verify_secret(hash: bytes, secret: bytes, type: Type) -> Literal[True]:
         len(secret),
         type.value,
     )
+
     if rv == lib.ARGON2_OK:
         return True
-    elif rv == lib.ARGON2_VERIFY_MISMATCH:
+
+    if rv == lib.ARGON2_VERIFY_MISMATCH:
         raise VerifyMismatchError(error_to_str(rv))
-    else:
-        raise VerificationError(error_to_str(rv))
+
+    raise VerificationError(error_to_str(rv))
 
 
 def core(context: Any, type: int) -> int:
@@ -220,7 +222,7 @@ def core(context: Any, type: int) -> int:
 
     .. warning::
         This is a strictly advanced function working on raw C data structures.
-        Both *Argon2*'s and *argon2-cffi*'s higher-level bindings do a lot of
+        Both Argon2's and *argon2-cffi*'s higher-level bindings do a lot of
         sanity checks and housekeeping work that *you* are now responsible for
         (e.g. clearing buffers). The structure of the *context* object can,
         has, and will change with *any* release!
@@ -228,18 +230,18 @@ def core(context: Any, type: int) -> int:
         Use at your own peril; *argon2-cffi* does *not* use this binding
         itself.
 
-    :param context: A CFFI *Argon2* context object (i.e. an ``struct
-        Argon2_Context``/``argon2_context``).
-    :param int type: Which *Argon2* variant to use.  You can use the ``value``
+    :param context: A CFFI Argon2 context object (i.e. an ``struct
+        Argon2_Context`` / ``argon2_context``).
+    :param int type: Which Argon2 variant to use.  You can use the ``value``
         field of :class:`Type`'s fields.
 
     :rtype: int
-    :return: An *Argon2* error code.  Can be transformed into a string using
+    :return: An Argon2 error code.  Can be transformed into a string using
         :func:`error_to_str`.
 
     .. versionadded:: 16.0.0
     """
-    return lib.argon2_ctx(context, type)
+    return lib.argon2_ctx(context, type)  # type: ignore[no-any-return]
 
 
 def error_to_str(error: int) -> str:
@@ -254,4 +256,5 @@ def error_to_str(error: int) -> str:
     """
     msg = ffi.string(lib.argon2_error_message(error))
     msg = msg.decode("ascii")
-    return msg
+
+    return msg  # type: ignore[no-any-return]
