@@ -7,6 +7,7 @@ Legacy mid-level functions.
 from __future__ import annotations
 
 import os
+import warnings
 
 from ._password_hasher import (
     DEFAULT_HASH_LENGTH,
@@ -19,6 +20,9 @@ from ._typing import Literal
 from .low_level import Type, hash_secret, hash_secret_raw, verify_secret
 
 
+_INSTEAD = " is deprecated, use argon2.PasswordHasher instead"
+
+
 def hash_password(
     password: bytes,
     salt: bytes | None = None,
@@ -29,11 +33,15 @@ def hash_password(
     type: Type = Type.I,
 ) -> bytes:
     """
-    Legacy alias for :func:`hash_secret` with default parameters.
+    Legacy alias for :func:`argon2.low_level.hash_secret` with default
+    parameters.
 
     .. deprecated:: 16.0.0
         Use :class:`argon2.PasswordHasher` for passwords.
     """
+    warnings.warn(
+        "argon2.hash_password" + _INSTEAD, DeprecationWarning, stacklevel=2
+    )
     if salt is None:
         salt = os.urandom(DEFAULT_RANDOM_SALT_LENGTH)
     return hash_secret(
@@ -51,11 +59,15 @@ def hash_password_raw(
     type: Type = Type.I,
 ) -> bytes:
     """
-    Legacy alias for :func:`hash_secret_raw` with default parameters.
+    Legacy alias for :func:`argon2.low_level.hash_secret_raw` with default
+    parameters.
 
     .. deprecated:: 16.0.0
         Use :class:`argon2.PasswordHasher` for passwords.
     """
+    warnings.warn(
+        "argon2.hash_password_raw" + _INSTEAD, DeprecationWarning, stacklevel=2
+    )
     if salt is None:
         salt = os.urandom(DEFAULT_RANDOM_SALT_LENGTH)
     return hash_secret_raw(
@@ -67,9 +79,13 @@ def verify_password(
     hash: bytes, password: bytes, type: Type = Type.I
 ) -> Literal[True]:
     """
-    Legacy alias for :func:`verify_secret` with default parameters.
+    Legacy alias for :func:`argon2.low_level.verify_secret` with default
+    parameters.
 
     .. deprecated:: 16.0.0
         Use :class:`argon2.PasswordHasher` for passwords.
     """
+    warnings.warn(
+        "argon2.verify_password" + _INSTEAD, DeprecationWarning, stacklevel=2
+    )
     return verify_secret(hash, password, type)

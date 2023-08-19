@@ -43,15 +43,22 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = ["hypothesis", "pytest"]
-docs = ["sphinx", "sphinx-notfound-page", "furo", "myst-parser"]
-dev = ["argon2-cffi[tests,docs]", "mypy"]
+typing = ["mypy"]
+docs = [
+    "sphinx",
+    "sphinx-notfound-page",
+    "sphinx-copybutton",
+    "furo",
+    "myst-parser",
+]
+dev = ["argon2-cffi[tests,typing]", "tox>4"]
 
 [project.urls]
 Documentation = "https://argon2-cffi.readthedocs.io/"
 Changelog = "https://github.com/hynek/argon2-cffi/blob/main/CHANGELOG.md"
-"Source Code" = "https://github.com/hynek/argon2-cffi"
+GitHub = "https://github.com/hynek/argon2-cffi"
 Funding = "https://github.com/sponsors/hynek"
-Tidelift = "https://tidelift.com/subscription/pkg/pypi-argon2-cffi?utm_source=pypi-argon2-cffi&utm_medium=pypi"
+Tidelift = "https://tidelift.com/?utm_source=lifter&utm_medium=referral&utm_campaign=hynek"
 
 
 [tool.hatch.version]
@@ -63,23 +70,38 @@ raw-options = { local_scheme = "no-local-version" }
 content-type = "text/markdown"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = "# *argon2-cffi*: Argon2 for Python\n\n"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "README.md"
+start-after = "<!-- begin pypi -->\n"
+end-before = "\n<!-- end pypi -->"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
 
+## Release Information
 
-## Release Information for """
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "CHANGELOG.md"
-start-after = "<!-- changelog follows -->"
-pattern = "## ([^\n]+?\n\n)###"
+"""
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "CHANGELOG.md"
 start-after = "<!-- changelog follows -->"
 pattern = "\n(###.+?\n)## "
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = """
+---
+
+[→ Full Changelog](https://github.com/hynek/argon2-cffi/blob/main/CHANGELOG.md)
+
+
+"""
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-at = "## Credits"
+
 
 
 [tool.pytest.ini_options]
@@ -117,6 +139,16 @@ exclude_lines = [
     "-> ['\"]?NoReturn['\"]?:",
 ]
 omit = []
+
+
+[tool.interrogate]
+verbose = 2
+fail-under = 100
+whitelist-regex = ["test_.*"]
+
+
+[tool.pyright]
+ignore = ["conftest.py", "docs", "tests"]
 
 
 [tool.mypy]

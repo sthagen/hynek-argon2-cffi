@@ -52,7 +52,7 @@ def __getattr__(name: str) -> str:
         "__url__": "",
         "__email__": "",
     }
-    if name not in dunder_to_metadata.keys():
+    if name not in dunder_to_metadata:
         msg = f"module {__name__} has no attribute {name}"
         raise AttributeError(msg)
 
@@ -81,3 +81,12 @@ def __getattr__(name: str) -> str:
         return meta["Author-email"].split("<", 1)[1].rstrip(">")
 
     return meta[dunder_to_metadata[name]]
+
+
+# Make nicer public names.
+__locals = locals()
+for __name in __all__:
+    if not __name.startswith(("__", "DEFAULT_")) and not __name.islower():
+        __locals[__name].__module__ = "argon2"
+del __locals
+del __name  # pyright: ignore[reportUnboundVariable]

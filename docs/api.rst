@@ -3,44 +3,6 @@ API Reference
 
 .. module:: argon2
 
-*argon2-cffi* comes with an high-level API and uses the officially recommended low-memory Argon2 parameters that result in a verification time of 40--50ms on recent-ish hardware.
-
-.. warning::
-
-   The current memory requirement is set to rather conservative 64 MB.
-   However, in memory constrained environments such as Docker containers that can lead to problems.
-   One possible non-obvious symptom are apparent freezes that are caused by swapping.
-
-   Please check :doc:`parameters` for more details.
-
-Unless you have any special needs, all you need to know is:
-
-.. doctest::
-
-  >>> from argon2 import PasswordHasher
-  >>> ph = PasswordHasher()
-  >>> hash = ph.hash("correct horse battery staple")
-  >>> hash  # doctest: +SKIP
-  '$argon2id$v=19$m=65536,t=3,p=4$MIIRqgvgQbgj220jfp0MPA$YfwJSVjtjSU0zzV/P3S9nnQ/USre2wvJMjfCIjrTQbg'
-  >>> ph.verify(hash, "correct horse battery staple")
-  True
-  >>> ph.check_needs_rehash(hash)
-  False
-  >>> ph.verify(hash, "Tr0ub4dor&3")
-  Traceback (most recent call last):
-    ...
-  argon2.exceptions.VerifyMismatchError: The password does not match the supplied hash
-
-
-A login function could thus look like this:
-
-.. literalinclude:: login_example.py
-   :language: python
-
-----
-
-While the :class:`PasswordHasher` class has the aspiration to be good to use out of the box, it has all the parametrization you'll need:
-
 .. autoclass:: PasswordHasher
   :members: from_parameters, hash, verify, check_needs_rehash
 
@@ -147,8 +109,23 @@ Low Level
 
 .. automodule:: argon2.low_level
 
-.. autoclass:: Type
-  :members: D, I, ID
+.. autoclass:: Type()
+
+   .. attribute:: D
+
+      Argon2\ **d** is faster and uses data-depending memory access.
+      That makes it less suitable for hashing secrets and more suitable for cryptocurrencies and applications with no threats from side-channel timing attacks.
+
+   .. attribute:: I
+
+      Argon2\ **i** uses data-independent memory access.
+      Argon2i is slower as it makes more passes over the memory to protect from tradeoff attacks.
+
+   .. attribute:: ID
+
+      Argon2\ **id** is a hybrid of Argon2i and Argon2d, using a combination of data-depending and data-independent memory accesses, which gives some of Argon2i's resistance to side-channel cache timing attacks and much of Argon2d's resistance to GPU cracking attacks.
+
+      .. versionadded:: 16.3.0
 
 .. autodata:: ARGON2_VERSION
 
@@ -233,7 +210,7 @@ These APIs are from the first release of *argon2-cffi* and proved to live in an 
 On one hand they have defaults and check parameters but on the other hand they only consume byte strings.
 
 Therefore the decision has been made to replace them by a high-level (:class:`argon2.PasswordHasher`) and a low-level (:mod:`argon2.low_level`) solution.
-There are no immediate plans to remove them though.
+They will be removed in 2024.
 
 .. autofunction:: argon2.hash_password
 .. autofunction:: argon2.hash_password_raw

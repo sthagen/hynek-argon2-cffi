@@ -23,7 +23,10 @@ What explicitly *may* change over time are the default hashing parameters and th
 
 <!-- changelog follows -->
 
-## [Unreleased](https://github.com/hynek/argon2-cffi/compare/21.3.0...HEAD)
+
+## [Unreleased](https://github.com/hynek/argon2-cffi/compare/23.1.0...HEAD)
+
+## [23.1.0](https://github.com/hynek/argon2-cffi/compare/21.3.0...23.1.0) - 2023-08-15
 
 ### Removed
 
@@ -35,6 +38,9 @@ What explicitly *may* change over time are the default hashing parameters and th
 - The `InvalidHash` exception is deprecated in favor of `InvalidHashError`.
   No plans for removal currently exist and the names can (but shouldn't) be used interchangeably.
 
+- `argon2.hash_password()`, `argon2.hash_password_raw()`, and `argon2.verify_password()` that have been soft-deprecated since 2016 are now hard-deprecated.
+  They now raise `DeprecationWarning`s and will be removed in 2024.
+
 
 ### Added
 
@@ -42,6 +48,10 @@ What explicitly *may* change over time are the default hashing parameters and th
   No code changes were necessary.
 
 - `argon2.exceptions.InvalidHashError` as a replacement for `InvalidHash`.
+
+- *salt* parameter to `argon2.PasswordHasher.hash()` to allow for custom salts.
+  This is only useful for specialized use-cases -- leave it on None unless you know exactly what you are doing.
+  [#153](https://github.com/hynek/argon2-cffi/pull/153)
 
 
 ## [21.3.0](https://github.com/hynek/argon2-cffi/compare/21.2.0...21.3.0) - 2021-12-11
@@ -99,7 +109,7 @@ Vendoring *Argon2* @ [62358ba](https://github.com/P-H-C/phc-winner-argon2/tree/6
 
 ### Removed
 
-- Microsoft stopped providing the necessary SDKs to ship Python 2.7 wheels and currenly the downloads amount to 0.09%.
+- Microsoft stopped providing the necessary SDKs to ship Python 2.7 wheels and currently the downloads amount to 0.09%.
   Therefore we have decided that Python 2.7 is not supported anymore.
 
 

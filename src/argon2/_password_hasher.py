@@ -145,20 +145,34 @@ class PasswordHasher:
     def type(self) -> Type:
         return self._parameters.type
 
-    def hash(self, password: str | bytes) -> str:
+    def hash(self, password: str | bytes, *, salt: bytes | None = None) -> str:
         """
         Hash *password* and return an encoded hash.
 
-        :param password: Password to hash.
-        :type password: ``bytes`` or ``str``
+        Parameters:
 
-        :raises argon2.exceptions.HashingError: If hashing fails.
+            password: Password to hash.
 
-        :rtype: str
+            salt: If None, a random salt is securely created.
+
+                .. danger::
+
+                    You should **not** pass a salt unless you really know what
+                    you are doing.
+
+        Raises:
+
+            argon2.exceptions.HashingError: If hashing fails.
+
+        Returns:
+
+            Hashed *password*.
+
+        .. versionadded:: 23.1.0 *salt* parameter
         """
         return hash_secret(
             secret=_ensure_bytes(password, self.encoding),
-            salt=os.urandom(self.salt_len),
+            salt=salt or os.urandom(self.salt_len),
             time_cost=self.time_cost,
             memory_cost=self.memory_cost,
             parallelism=self.parallelism,
@@ -195,7 +209,7 @@ class PasswordHasher:
             because *hash* is not valid for *password*.
         :raises argon2.exceptions.VerificationError: If verification fails for
             other reasons.
-        :raises argon2.exceptions.InvalidHash: If *hash* is so clearly
+        :raises argon2.exceptions.InvalidHashError: If *hash* is so clearly
             invalid, that it couldn't be passed to Argon2.
 
         :return: ``True`` on success, raise
